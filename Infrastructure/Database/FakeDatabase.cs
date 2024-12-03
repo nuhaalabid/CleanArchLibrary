@@ -17,7 +17,7 @@ namespace Infrastructure.Database
         {
             Authors = new List<Author>
             {
-                new Author(1, "Annaaaaaa"),
+                new Author(1, "Anna"),
                 new Author(2, "Bob"),
                 new Author(3, "Carl")
             };
