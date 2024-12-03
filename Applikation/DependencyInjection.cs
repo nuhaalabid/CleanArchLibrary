@@ -6,20 +6,27 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Applikation.Users.Queries.Login.Helpers;
+using Infrastructure.Database;
+using Microsoft.EntityFrameworkCore;
 
 namespace Applikation
 {
         public static class DependencyInjection
         {
-            public static IServiceCollection AddApplication(this IServiceCollection services)
+            public static IServiceCollection AddApplication(this IServiceCollection services, string connectionString)
             {
                 var assembly = typeof(DependencyInjection).Assembly;
 
                 services.AddMediatR(configuration => configuration.RegisterServicesFromAssembly(assembly));
 
-                //services.AddValidatorsFromAssembly(assembly);
+            // Lägg till Realdatabase med anslutningssträngen
+            services.AddDbContext<Realdatabase>(options =>
+                options.UseSqlServer(connectionString));
 
-                services.AddScoped<TokenHelper>();
+
+            //services.AddValidatorsFromAssembly(assembly);
+
+            services.AddScoped<TokenHelper>();
 
                 return services;
             }
