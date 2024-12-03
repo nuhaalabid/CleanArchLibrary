@@ -86,8 +86,12 @@ namespace PresentationAPI
             builder.Services.AddSwaggerGen();
 
 
-            builder.Services.AddApplication();
-            
+            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+
+            builder.Services.AddApplication(connectionString);
+
+
 
             builder.Services.AddSingleton<FakeDatabase>();
 

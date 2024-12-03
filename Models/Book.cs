@@ -7,7 +7,7 @@
         public string Description { get; set; }
         public Author Author { get; set; }
 
-
+        public Book() { }
         public Book(int id, string title, string description, Author author)
         {
             Id = id;
