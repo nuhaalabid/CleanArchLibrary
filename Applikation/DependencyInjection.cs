@@ -6,8 +6,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Applikation.Users.Queries.Login.Helpers;
-using Infrastructure.Database;
-using Microsoft.EntityFrameworkCore;
 
 namespace Applikation
 {
@@ -18,10 +16,6 @@ namespace Applikation
                 var assembly = typeof(DependencyInjection).Assembly;
 
                 services.AddMediatR(configuration => configuration.RegisterServicesFromAssembly(assembly));
-
-            // Lägg till Realdatabase med anslutningssträngen
-            services.AddDbContext<Realdatabase>(options =>
-                options.UseSqlServer(connectionString));
 
 
             //services.AddValidatorsFromAssembly(assembly);

@@ -89,11 +89,7 @@ namespace PresentationAPI
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 
-            builder.Services.AddApplication(connectionString);
 
-
-
-            builder.Services.AddSingleton<FakeDatabase>();
 
 
             var app = builder.Build();

@@ -25,6 +25,5 @@ namespace Applikation.Authors.Queries.GetById
 
             return Task.FromResult(author);
         }
-
     }
 }

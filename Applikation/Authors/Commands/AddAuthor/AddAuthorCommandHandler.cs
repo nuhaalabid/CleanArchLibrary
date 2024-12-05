@@ -25,6 +25,5 @@ namespace Applikation.Authors.Commands.AddAuthor
 
             return Task.FromResult(newAuthor);
         }
-
     }
 }

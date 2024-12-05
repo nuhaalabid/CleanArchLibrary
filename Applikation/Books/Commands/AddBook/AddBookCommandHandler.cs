@@ -25,7 +25,5 @@ namespace Applikation.Books.Commands.AddBook
 
             _database.Books.Add(newBook);
 
-            return Task.FromResult(newBook);
-        }
     }
 }
