@@ -28,6 +28,5 @@ namespace Applikation.Authors.Commands.UpdateAuthor
 
             return Task.FromResult(authorToUpdate);
         }
-
     }
 }

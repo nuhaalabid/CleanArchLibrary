@@ -23,6 +23,5 @@ namespace Applikation.Books.Queries.GetById
 
             return Task.FromResult(book);
         }
-
     }
 }

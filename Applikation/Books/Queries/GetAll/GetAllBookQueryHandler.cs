@@ -22,7 +22,5 @@ namespace Applikation.Books.Queries.GetAll
             var books = _database.Books;
             return Task.FromResult(books);
         }
-
-
     }
 }
