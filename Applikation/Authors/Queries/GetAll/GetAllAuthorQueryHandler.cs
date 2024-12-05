@@ -1,4 +1,5 @@
-﻿using Infrastructure.Database;
+﻿
+using Applikation.Interfaces.RepositoryInterfaces;
 using MediatR;
 using Models;
 using System;
@@ -11,16 +12,17 @@ namespace Applikation.Authors.Queries.GetAll
 {
     public class GetAllAuthorQueryHandler : IRequestHandler<GetAllAuthorQuery, List<Author>>
     {
-        private readonly FakeDatabase _database;
+        private readonly IAuthorRepository _authorRepository;
 
-        public GetAllAuthorQueryHandler(FakeDatabase database)
+        public GetAllAuthorQueryHandler(IAuthorRepository authorRepository)
         {
-            _database = database;
+            _authorRepository = authorRepository;
         }
 
-        public Task<List<Author>> Handle(GetAllAuthorQuery request, CancellationToken cancellationToken)
+        public async Task<List<Author>> Handle(GetAllAuthorQuery request, CancellationToken cancellationToken)
         {
-            return Task.FromResult(_database.Authors);
+            return await _authorRepository.GetAllAuthors();
         }
+
     }
 }

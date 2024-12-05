@@ -1,7 +1,11 @@
 using Applikation;
+using Applikation.Interfaces.RepositoryInterfaces;
+using Infrastructure;
 using Infrastructure.Database;
+using Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -13,6 +17,10 @@ namespace PresentationAPI
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
+            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+            builder.Services.AddInfrastructure(connectionString);
+
 
             // Add services to the container.
 
@@ -85,11 +93,9 @@ namespace PresentationAPI
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
+            builder.Services.AddApplication();
 
-            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-
-
-
+            builder.Services.AddSingleton<FakeDatabase>();
 
 
             var app = builder.Build();

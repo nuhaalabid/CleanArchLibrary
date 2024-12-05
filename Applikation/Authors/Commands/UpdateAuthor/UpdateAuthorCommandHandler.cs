@@ -1,4 +1,4 @@
-﻿using Infrastructure.Database;
+﻿using Applikation.Interfaces.RepositoryInterfaces;
 using MediatR;
 using Models;
 using System;
@@ -11,22 +11,24 @@ namespace Applikation.Authors.Commands.UpdateAuthor
 {
     public class UpdateAuthorCommandHandler : IRequestHandler<UpdateAuthorCommand, Author>
     {
-        private readonly FakeDatabase _database;
+        private readonly IAuthorRepository _authorRepository;
 
-        public UpdateAuthorCommandHandler(FakeDatabase database)
+        public UpdateAuthorCommandHandler(IAuthorRepository authorRepository)
         {
-            _database = database;
+            _authorRepository = authorRepository;
         }
-        public Task<Author> Handle(UpdateAuthorCommand request, CancellationToken cancellationToken)
+
+        public async Task<Author> Handle(UpdateAuthorCommand request, CancellationToken cancellationToken)
         {
-            var authorToUpdate = _database.Authors.FirstOrDefault(a => a.Id == request.Id);
+            var author = await _authorRepository.GetAuthorById(request.Id);
 
-            if (authorToUpdate != null)
-            {
-                authorToUpdate.Name = request.UpdatedAuthor.Name;
-            }
+            if (author == null)
+                return null;
 
-            return Task.FromResult(authorToUpdate);
+            author.Name = request.UpdatedAuthor.Name;
+
+            await _authorRepository.UpdateAuthor(author);
+            return author;
         }
     }
 }

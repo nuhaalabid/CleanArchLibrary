@@ -1,4 +1,4 @@
-﻿using Infrastructure.Database;
+﻿using Applikation.Interfaces.RepositoryInterfaces;
 using MediatR;
 using Models;
 using System;
@@ -11,19 +11,16 @@ namespace Applikation.Authors.Queries.GetById
 {
     public class GetAuthorByIdQueryHandler : IRequestHandler<GetAuthorByIdQuery, Author>
     {
-        private readonly FakeDatabase _database;
+        private readonly IAuthorRepository _authorRepository;
 
-        public GetAuthorByIdQueryHandler(FakeDatabase database)
+        public GetAuthorByIdQueryHandler(IAuthorRepository authorRepository)
         {
-            _database = database;
+            _authorRepository = authorRepository;
         }
 
-        public Task<Author> Handle(GetAuthorByIdQuery request, CancellationToken cancellationToken)
+        public async Task<Author> Handle(GetAuthorByIdQuery request, CancellationToken cancellationToken)
         {
-            // Hämta författaren baserat på ID
-            var author = _database.Authors.FirstOrDefault(a => a.Id == request.AuthorId);
-
-            return Task.FromResult(author);
+            return await _authorRepository.GetAuthorById(request.AuthorId);
         }
     }
 }
