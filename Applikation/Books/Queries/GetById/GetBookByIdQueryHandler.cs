@@ -1,4 +1,4 @@
-﻿using Infrastructure.Database;
+﻿using Applikation.Interfaces.RepositoryInterfaces;
 using MediatR;
 using Models;
 using System;
@@ -11,17 +11,16 @@ namespace Applikation.Books.Queries.GetById
 {
     public class GetBookByIdQueryHandler : IRequestHandler<GetBookByIdQuery, Book>
     {
-        private readonly FakeDatabase _database;
+        private readonly IBookRepository _bookRepository;
 
-        public GetBookByIdQueryHandler(FakeDatabase database)
+        public GetBookByIdQueryHandler(IBookRepository bookRepository)
         {
-            _database = database;
+            _bookRepository = bookRepository;
         }
-        public Task<Book> Handle(GetBookByIdQuery request, CancellationToken cancellationToken)
-        {
-            var book = _database.Books.FirstOrDefault(b => b.Id == request.BookId);
 
-            return Task.FromResult(book);
+        public async Task<Book> Handle(GetBookByIdQuery request, CancellationToken cancellationToken)
+        {
+            return await _bookRepository.GetBookById(request.BookId);
         }
     }
 }

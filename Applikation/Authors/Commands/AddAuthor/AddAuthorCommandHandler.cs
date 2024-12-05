@@ -1,4 +1,4 @@
-﻿using Infrastructure.Database;
+﻿using Applikation.Interfaces.RepositoryInterfaces;
 using MediatR;
 using Models;
 using System;
@@ -11,19 +11,16 @@ namespace Applikation.Authors.Commands.AddAuthor
 {
     public class AddAuthorCommandHandler : IRequestHandler<AddAuthorCommand, Author>
     {
-        private readonly FakeDatabase _database;
+        private readonly IAuthorRepository _authorRepository;
 
-        public AddAuthorCommandHandler(FakeDatabase database)
+        public AddAuthorCommandHandler(IAuthorRepository authorRepository)
         {
-            _database = database;
+            _authorRepository = authorRepository;
         }
-        public Task<Author> Handle(AddAuthorCommand request, CancellationToken cancellationToken)
+
+        public async Task<Author> Handle(AddAuthorCommand request, CancellationToken cancellationToken)
         {
-            var newAuthor = request.NewAuthor;
-
-            _database.Authors.Add(newAuthor);
-
-            return Task.FromResult(newAuthor);
+            return await _authorRepository.AddAuthor(request.NewAuthor);
         }
     }
 }

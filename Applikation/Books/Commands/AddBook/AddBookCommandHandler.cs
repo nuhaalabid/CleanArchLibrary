@@ -1,4 +1,4 @@
-﻿using Infrastructure.Database;
+﻿using Applikation.Interfaces.RepositoryInterfaces;
 using MediatR;
 using Models;
 using System;
@@ -12,18 +12,19 @@ namespace Applikation.Books.Commands.AddBook
 {
     public class AddBookCommandHandler : IRequestHandler<AddBookCommand, Book>
     {
-        private readonly FakeDatabase _database;
+        private readonly IBookRepository _bookRepository;
 
-        public AddBookCommandHandler(FakeDatabase database)
+        public AddBookCommandHandler(IBookRepository bookRepository)
         {
-            _database = database;
+            _bookRepository = bookRepository;
         }
 
-        public Task<Book> Handle(AddBookCommand request, CancellationToken cancellationToken)
+        public async Task<Book> Handle(AddBookCommand request, CancellationToken cancellationToken)
         {
             var newBook = request.NewBook;
-
-            _database.Books.Add(newBook);
+            return await _bookRepository.AddBook(newBook);
+        }
 
     }
 }
+

@@ -1,4 +1,4 @@
-﻿using Infrastructure.Database;
+﻿using Applikation.Interfaces.RepositoryInterfaces;
 using MediatR;
 using System;
 using System.Collections.Generic;
@@ -8,27 +8,25 @@ using System.Threading.Tasks;
 
 namespace Applikation.Authors.Commands.DeleteAuthor
 {
+
     public class DeleteAuthorCommandHandler : IRequestHandler<DeleteAuthorCommand, bool>
     {
-        private readonly FakeDatabase _database;
+        private readonly IAuthorRepository _authorRepository;
 
-        public DeleteAuthorCommandHandler(FakeDatabase database)
+        public DeleteAuthorCommandHandler(IAuthorRepository authorRepository)
         {
-            _database = database;
+            _authorRepository = authorRepository;
         }
-        public Task<bool> Handle(DeleteAuthorCommand request, CancellationToken cancellationToken)
+
+        public async Task<bool> Handle(DeleteAuthorCommand request, CancellationToken cancellationToken)
         {
-            var authorToDelete = _database.Authors.FirstOrDefault(a => a.Id == request.AuthorId);
+            var author = await _authorRepository.GetAuthorById(request.AuthorId);
 
-            // Om författaren inte finns, returnera false
-            if (authorToDelete == null)
-            {
-                return Task.FromResult(false);
-            }
-            _database.Authors.Remove(authorToDelete);
+            if (author == null)
+                return false;
 
-            // Returnera true om författaren togs bort framgångsrikt
-            return Task.FromResult(true);
+            await _authorRepository.DeleteAuthor(request.AuthorId);
+            return true;
         }
     }
 }

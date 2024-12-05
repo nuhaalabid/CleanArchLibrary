@@ -1,4 +1,4 @@
-﻿using Infrastructure.Database;
+﻿using Applikation.Interfaces.RepositoryInterfaces;
 using MediatR;
 using Models;
 using System;
@@ -11,16 +11,16 @@ namespace Applikation.Books.Queries.GetAll
 {
     public class GetAllBookQueryHandler : IRequestHandler<GetAllBookQuery, List<Book>>
     {
-        private readonly FakeDatabase _database;
+        private readonly IBookRepository _bookRepository;
 
-        public GetAllBookQueryHandler(FakeDatabase database)
+        public GetAllBookQueryHandler(IBookRepository bookRepository)
         {
-            _database = database;
+            _bookRepository = bookRepository;
         }
-        public Task<List<Book>> Handle(GetAllBookQuery request, CancellationToken cancellationToken)
+
+        public async Task<List<Book>> Handle(GetAllBookQuery request, CancellationToken cancellationToken)
         {
-            var books = _database.Books;
-            return Task.FromResult(books);
+            return await _bookRepository.GetAllBooks();
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using Infrastructure.Database;
+﻿using Applikation.Interfaces.RepositoryInterfaces;
 using MediatR;
 using Models;
 using System;
@@ -11,26 +11,29 @@ namespace Applikation.Books.Commands.UpdateBook
 {
     public class UpdateBookByIdCommandHandler : IRequestHandler<UpdateBookByIdCommand, Book>
     {
-        private readonly FakeDatabase _database;
+        private readonly IBookRepository _bookRepository;
 
-        public UpdateBookByIdCommandHandler(FakeDatabase database)
+        public UpdateBookByIdCommandHandler(IBookRepository bookRepository)
         {
-            _database = database;
+            _bookRepository = bookRepository;
         }
-        public Task<Book> Handle(UpdateBookByIdCommand request, CancellationToken cancellationToken)
+
+        public async Task<Book> Handle(UpdateBookByIdCommand request, CancellationToken cancellationToken)
         {
-            var book = _database.Books.FirstOrDefault(b => b.Id == request.Id);
+            var book = await _bookRepository.GetBookById(request.Id);
+
             if (book == null)
             {
-                return Task.FromResult<Book>(null); 
+                return null;
             }
 
-            //Uppdatera bokens egenskaper
+            // Uppdatera bokens egenskaper
             book.Title = request.UpdatedBook.Title;
             book.Description = request.UpdatedBook.Description;
             book.Author = request.UpdatedBook.Author;
 
-            return Task.FromResult(book); 
+            return await _bookRepository.UpdateBook(book);
         }
     }
+
 }
