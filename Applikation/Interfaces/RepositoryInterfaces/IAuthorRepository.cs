@@ -13,6 +13,6 @@ namespace Applikation.Interfaces.RepositoryInterfaces
         Task<Author> UpdateAuthor(Author author);
         Task DeleteAuthor(int id);
         Task<Author> GetAuthorById(int id);
-        Task<List<Author>> GetAllAuthors();
+        Task<List<Author>> GetAllAuthor();
     }
 }

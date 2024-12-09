@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Applikation.Authors.Queries.GetAll
 {
-    public class GetAllAuthorQuery : IRequest<List<Author>>
+    public class GetAllAuthorQuery : IRequest<OperationResult<List<Author>>>
     {
     }
 }

@@ -15,12 +15,12 @@ namespace Applikation
         {
             var assembly = typeof(DependencyInjection).Assembly;
 
-                services.AddMediatR(configuration => configuration.RegisterServicesFromAssembly(assembly));
+            services.AddMediatR(configuration => configuration.RegisterServicesFromAssembly(assembly));
 
 
             //services.AddValidatorsFromAssembly(assembly);
 
-            services.AddScoped<TokenHelper>();
+             services.AddScoped<TokenHelper>();
 
                 return services;
             }

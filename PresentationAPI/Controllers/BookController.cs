@@ -4,6 +4,7 @@ using Applikation.Books.Queries.GetAll;
 using Applikation.Books.Queries.GetById;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Models;
 using static Applikation.Books.Commands.AddBook.AddBookCommad;
 
@@ -16,10 +17,12 @@ namespace PresentationAPI.Controllers
     public class BookController : ControllerBase
     {
         private readonly IMediator _mediator;
+        private readonly ILogger<BookController> _logger;
 
-        public BookController(IMediator mediator)
+        public BookController(IMediator mediator, ILogger<BookController> logger)
         {
             _mediator = mediator;
+            _logger = logger;
         }
 
 
@@ -27,57 +30,109 @@ namespace PresentationAPI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllBooks()
         {
-            var result = await _mediator.Send(new GetAllBookQuery());
-
-            // Kontrollera om inga böcker hittades
-            if (result == null || !result.Any())
+            try
             {
-                return NotFound("Inga böcker hittades.");
+                _logger.LogInformation("Försöker hämta alla böcker.");
+                var query = new GetAllBookQuery();
+                var result = await _mediator.Send(query);
+
+                if (!result.IsSuccessful)
+                {
+                    _logger.LogWarning(result.ErrorMessage);
+                    return NotFound(result.ErrorMessage);
+                }
+
+                _logger.LogInformation(result.Message);
+                return Ok(result.Data);
             }
-            return Ok(result);
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ett fel inträffade vid hämtning av böcker.");
+                return StatusCode(500, "Ett oväntat fel inträffade.");
+            }
         }
 
 
-        // GET api/<BookController>/5
-        [HttpGet("{id}")]
-        public async Task<IActionResult> Get(int id)
+         // GET api/<BookController>/5
+         [HttpGet("{id}")]
+        public async Task<IActionResult> GetBookById(int id)
         {
-            var result = await _mediator.Send(new GetBookByIdQuery(id));
-
-            if (result == null)
+            try
             {
-                return NotFound($"Boken med ID {id} hittades inte."); 
+                _logger.LogInformation("Försöker hämta boken med ID {BookId}.", id);
+                var query = new GetBookByIdQuery(id);
+                var result = await _mediator.Send(query);
+
+                if (!result.IsSuccessful)
+                {
+                    _logger.LogWarning(result.ErrorMessage);
+                    return NotFound(result.ErrorMessage);
+                }
+
+                _logger.LogInformation(result.Message);
+                return Ok(result.Data);
             }
-            return Ok(result);
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ett fel inträffade vid hämtning av boken med ID {BookId}.", id);
+                return StatusCode(500, "Ett oväntat fel inträffade.");
+            }
         }
 
 
         // POST api/<BookController>
         [HttpPost]
-        public async Task<IActionResult> AddBook([FromBody] AddBookCommand command)
+        public async Task<IActionResult> AddBook([FromBody] Book newBook)
         {
-            var result = await _mediator.Send(command);
-            return Ok(result);
+            _logger.LogInformation("AddBook endpoint called with Title: {Title}", newBook.Title);
+
+            try
+            {
+                var result = await _mediator.Send(new AddBookCommand(newBook));
+
+                if (!result.IsSuccessful)
+                {
+                    _logger.LogWarning("AddBook failed for Title: {Title}. Reason: {Reason}", newBook.Title, result.ErrorMessage);
+                    return BadRequest(new { message = result.Message, error = result.ErrorMessage });
+                }
+
+                _logger.LogInformation("AddBook succeeded for Title: {Title}, ID: {Id}", newBook.Title, result.Data.Id);
+                return CreatedAtAction(nameof(GetBookById), new { id = result.Data.Id }, result.Data);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while adding the book with Title: {Title}", newBook.Title);
+                return StatusCode(500, "An unexpected error occurred while adding the book.");
+            }
         }
 
 
 
-        // PUT api/<BookController>/5
-        [HttpPut("{id}")]
+         // PUT api/<BookController>/5
+         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateBook(int id, [FromBody] Book updatedBook)
         {
-            if (id != updatedBook.Id)
-            {
-                return BadRequest("ID i URL och kropp matchar inte.");
-            }
-            var command = new UpdateBookByIdCommand(updatedBook, id);
-            var result = await _mediator.Send(command);
+            _logger.LogInformation("UpdateBook endpoint called for ID: {Id}", id);
 
-            if (result == null)
+            try
             {
-                return NotFound($"Boken med ID {id} hittades inte.");
+                var result = await _mediator.Send(new UpdateBookByIdCommand(updatedBook, id));
+
+                if (!result.IsSuccessful)
+                {
+                    _logger.LogWarning("UpdateBook failed for ID: {Id}. Reason: {Reason}", id, result.ErrorMessage);
+                    return NotFound(new { message = result.Message, error = result.ErrorMessage });
+                }
+
+                _logger.LogInformation("UpdateBook succeeded for ID: {Id}", id);
+                return Ok(result.Data);
             }
-            return Ok(result); 
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while updating the book with ID: {Id}", id);
+                return StatusCode(500, "An unexpected error occurred while updating the book.");
+            }
+
         }
 
 
@@ -86,13 +141,27 @@ namespace PresentationAPI.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteBook(int id)
         {
-            var result = await _mediator.Send(new DeleteBookCommand(id));
+            _logger.LogInformation("DeleteBook endpoint called with ID: {Id}", id);
 
-            if (!result)
+            try
             {
-                return NotFound("Book not found.");
+                var result = await _mediator.Send(new DeleteBookCommand(id));
+
+                if (!result.IsSuccessful)
+                {
+                    _logger.LogWarning("DeleteBook failed for ID: {Id}. Reason: {Reason}", id, result.ErrorMessage);
+                    return NotFound(new { message = result.Message, error = result.ErrorMessage });
+                }
+
+                _logger.LogInformation("DeleteBook succeeded for ID: {Id}", id);
+                return Ok(new { message = result.Message, success = result.Data });
             }
-            return Ok("Book deleted successfully.");
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while deleting the book with ID: {Id}", id);
+                return StatusCode(500, "An unexpected error occurred while deleting the book.");
+            }
+
         }
 
     }

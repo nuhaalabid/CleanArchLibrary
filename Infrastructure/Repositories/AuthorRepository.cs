@@ -48,7 +48,7 @@ namespace Infrastructure.Repositories
             return await _realdatabase.Authors.FindAsync(id);
         }
 
-        public async Task<List<Author>> GetAllAuthors()
+        public async Task<List<Author>> GetAllAuthor()
         {
             return await _realdatabase.Authors.ToListAsync();
         }

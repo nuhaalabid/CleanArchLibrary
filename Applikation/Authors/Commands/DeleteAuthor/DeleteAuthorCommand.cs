@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Applikation.Authors.Commands.DeleteAuthor
 {
-    public class DeleteAuthorCommand : IRequest<bool>
+    public class DeleteAuthorCommand :IRequest< OperationResult<bool>>
     {
         public int AuthorId { get; }
 

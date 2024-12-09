@@ -11,7 +11,7 @@ namespace Applikation.Books.Commands.AddBook
     public class AddBookCommad
     {
 
-        public class AddBookCommand : IRequest<Book>
+        public class AddBookCommand : IRequest<OperationResult<Book>>
         {
             public AddBookCommand(Book newBook)
             {

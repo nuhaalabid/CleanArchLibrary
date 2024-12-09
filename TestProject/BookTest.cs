@@ -90,28 +90,28 @@
 //            var result = await _getAllHandler.Handle(query, CancellationToken.None);
 
 //            // Assert
-//            Assert.IsNotNull(result); 
-//            Assert.AreEqual(5, result.Count);  
+//            Assert.IsNotNull(result);
+//            Assert.AreEqual(5, result.Count);
 //        }
 
 //        [Test]
 //        public async Task GetBookById_ShouldReturnBook_WhenBookExists()
 //        {
 //            // Arrange
-//            var query = new GetBookByIdQuery(1);  
+//            var query = new GetBookByIdQuery(1);
 
 //            // Act
 //            var result = await _getByIdHandler.Handle(query, CancellationToken.None);
 
 //            // Assert
-//            Assert.IsNotNull(result);  
-//            Assert.AreEqual(1, result.Id);  
-//            Assert.AreEqual("Sky", result.Title);  
+//            Assert.IsNotNull(result);
+//            Assert.AreEqual(1, result.Id);
+//            Assert.AreEqual("Sky", result.Title);
 //        }
 
 //    }
 //}
-    
-    
 
-    
+
+
+
