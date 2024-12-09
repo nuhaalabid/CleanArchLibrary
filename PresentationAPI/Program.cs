@@ -83,7 +83,7 @@ namespace PresentationAPI
                             Id = "Bearer"
                         }
                     },
-                    Array.Empty<string>()  
+                    Array.Empty<string>()
                 }
             });
             });
@@ -95,7 +95,9 @@ namespace PresentationAPI
 
             builder.Services.AddApplication();
 
-            builder.Services.AddSingleton<FakeDatabase>();
+           // builder.Services.AddSingleton<FakeDatabase>();
+
+            builder.Services.AddLogging(); // Lägg till logging
 
 
             var app = builder.Build();

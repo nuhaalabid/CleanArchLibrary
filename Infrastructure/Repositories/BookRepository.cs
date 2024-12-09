@@ -21,8 +21,8 @@ namespace Infrastructure.Repositories
 
         public async Task<Book> AddBook(Book book)
         {
-            _realdatabase.Books.Add(book);
-            _realdatabase.SaveChanges();
+            await _realdatabase.Books.AddAsync(book);
+            await _realdatabase.SaveChangesAsync();
             return book;
         }
 

@@ -7,6 +7,7 @@ using Applikation.Authors.Queries.GetById;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Models;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -18,21 +19,40 @@ namespace PresentationAPI.Controllers
     public class AuthorController : ControllerBase
     {
         private readonly IMediator _mediator;
+        private readonly ILogger<AuthorController> _logger;
 
-        public AuthorController(IMediator mediator)
+        public AuthorController(IMediator mediator, ILogger<AuthorController> logger)
         {
             _mediator = mediator;
+            _logger = logger;
         }
 
 
         // GET: api/<AuthorController>
-        [Authorize]
+        //[Authorize]
         [HttpGet]
-        public async Task<IActionResult> GetAllAuthors()
+        public async Task<IActionResult> GetAllAuthor()
         {
-            var result = await _mediator.Send(new GetAllAuthorQuery());
+            try
+            {
+                _logger.LogInformation("Fetching all authors.");
 
-            return Ok(result);
+                var result = await _mediator.Send(new GetAllAuthorQuery());
+
+                if (!result.IsSuccessful)
+                {
+                    _logger.LogWarning("Failed to fetch authors: {Message}", result.Message);
+                    return BadRequest(result.Message);
+                }
+
+                _logger.LogInformation("Successfully fetched authors.");
+                return Ok(result.Data);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while fetching all authors.");
+                return StatusCode(500, "An internal server error occurred.");
+            }
         }
 
 
@@ -40,74 +60,103 @@ namespace PresentationAPI.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetAuthorById(int id)
         {
-            var author = await _mediator.Send(new GetAuthorByIdQuery(id));
+            _logger.LogInformation("Received request to fetch author with ID {AuthorId}", id);
 
-            if (author == null)
+            var result = await _mediator.Send(new GetAuthorByIdQuery(id));
+
+            if (!result.IsSuccessful)
             {
-                return NotFound();
+                _logger.LogWarning("Failed to fetch author with ID {AuthorId}: {ErrorMessage}", id, result.Message);
+                return NotFound(result.Message);
             }
 
-            return Ok(author);
+            _logger.LogInformation("Successfully fetched author with ID {AuthorId}", id);
+            return Ok(result.Data);
         }
+
 
         // POST api/<AuthorController>
         [HttpPost]
         public async Task<IActionResult> AddAuthor([FromBody] Author newAuthor)
         {
-            try
-            {  
-                if (newAuthor == null || string.IsNullOrWhiteSpace(newAuthor.Name))
-                {
-                    return BadRequest(new { Message = "Författarens namn är obligatoriskt." });
-                }
-                
-                var addedAuthor = await _mediator.Send(new AddAuthorCommand(newAuthor));
+            _logger.LogInformation("Start processing AddAuthor request.");
 
-                if (addedAuthor == null)
+            if (newAuthor == null || string.IsNullOrWhiteSpace(newAuthor.Name))
+            {
+                _logger.LogWarning("Invalid Author data received.");
+                return BadRequest("Author data is invalid.");
+            }
+
+            try
+            {
+                var command = new AddAuthorCommand(newAuthor);
+                _logger.LogInformation("Sending AddAuthorCommand to MediatR.");
+
+                var result = await _mediator.Send(command);
+
+                if (!result.IsSuccessful)
                 {
-                    return StatusCode(500, new { Message = "Ett internt serverfel uppstod vid tillägg av författaren." });
+                    _logger.LogWarning("Failed to add author. Reason: {Reason}", result.Message);
+                    return BadRequest(result.Message);
                 }
-                return CreatedAtAction(nameof(GetAuthorById), new { id = addedAuthor.Id }, addedAuthor);
+
+                _logger.LogInformation("Author {AuthorName} added successfully with ID: {AuthorId}.", result.Data.Name, result.Data.Id);
+                return CreatedAtAction(nameof(GetAuthorById), new { id = result.Data.Id }, result.Data);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { Message = "Ett oväntat fel inträffade.", Error = ex.Message });
+                _logger.LogError(ex, "An error occurred while adding author: {AuthorName}.", newAuthor.Name);
+                return StatusCode(500, "An unexpected error occurred. Please try again later.");
             }
         }
+    
 
         // PUT api/<AuthorController>/5
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateAuthor(int id, [FromBody] Author updatedAuthor)
         {
-            var command = new UpdateAuthorCommand(updatedAuthor, id);
+            _logger.LogInformation("Startar uppdatering av författare med ID: {AuthorId}", id);
 
-            var result = await _mediator.Send(command);
-
-            if (result == null)
+            if (updatedAuthor == null || string.IsNullOrWhiteSpace(updatedAuthor.Name))
             {
-                return NotFound(new { message = "Author not found" });
+                _logger.LogWarning("Uppdateringsdata för författare är ogiltig. AuthorId: {AuthorId}", id);
+                return BadRequest("Ogiltiga uppgifter för författare.");
             }
 
-            return Ok(result);
+            var command = new UpdateAuthorCommand(id, updatedAuthor);
+            var result = await _mediator.Send(command);
+
+            if (!result.IsSuccessful)
+            {
+                _logger.LogWarning("Uppdateringen av författaren med ID: {AuthorId} misslyckades. Meddelande: {Message}", id, result.Message);
+                return NotFound(result.Message);
+            }
+
+            _logger.LogInformation("Författaren med ID: {AuthorId} har uppdaterats framgångsrikt.", id);
+            return Ok(result.Data); 
         }
 
 
 
         // DELETE api/<AuthorController>/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+
+        public async Task<IActionResult> DeleteAuthor(int id)
         {
+            _logger.LogInformation("Start processing DeleteAuthor for AuthorId: {AuthorId}", id);
+
             var command = new DeleteAuthorCommand(id);
             var result = await _mediator.Send(command);
 
-            if (result)
+            if (!result.IsSuccessful)
             {
-                return Ok(new { message = "Author deleted successfully." });
+                _logger.LogWarning("Failed to delete AuthorId: {AuthorId}. Reason: {Reason}", id, result.Message);
+                return NotFound(result.Message);
             }
-            else
-            {
-                return NotFound(new { message = "Author not found." });
-            }
+
+            _logger.LogInformation("Successfully deleted AuthorId: {AuthorId}", id);
+            return NoContent(); 
         }
     }
 }
+
