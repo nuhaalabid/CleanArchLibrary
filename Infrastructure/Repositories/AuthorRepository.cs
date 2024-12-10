@@ -50,7 +50,9 @@ namespace Infrastructure.Repositories
 
         public async Task<List<Author>> GetAllAuthor()
         {
-            return await _realdatabase.Authors.ToListAsync();
+            var authors = await _realdatabase.Authors.ToListAsync();
+
+            return authors;
         }
     }
 }

@@ -45,9 +45,8 @@ namespace Infrastructure.Repositories
 
         public async Task<List<Book>> GetAllBooks()
         {
-            return await _realdatabase.Books
-                .Include(b => b.Author)
-                .ToListAsync(); 
+            return await _realdatabase.Books.ToListAsync();
+
         }
 
         public async Task<Book> GetBookById(int id)
