@@ -86,13 +86,24 @@ namespace PresentationAPI.Controllers
         {
             _logger.LogInformation("AddBook endpoint called with Title: {Title}", newBook.Title);
 
+            // Modellvalidering
+            if (!ModelState.IsValid)
+            {
+                _logger.LogWarning("AddBook failed validation for Title: {Title}. Validation errors: {Errors}",
+                    newBook.Title,
+                    ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
+
+                return BadRequest(ModelState); // Returnera valideringsfel
+            }
             try
             {
                 var result = await _mediator.Send(new AddBookCommand(newBook));
 
                 if (!result.IsSuccessful)
                 {
-                    _logger.LogWarning("AddBook failed for Title: {Title}. Reason: {Reason}", newBook.Title, result.ErrorMessage);
+                    _logger.LogWarning("AddBook failed for Title: {Title}. Reason: {Reason}",
+                        newBook.Title, result.ErrorMessage);
+
                     return BadRequest(new { message = result.Message, error = result.ErrorMessage });
                 }
 
@@ -108,12 +119,22 @@ namespace PresentationAPI.Controllers
 
 
 
-         // PUT api/<BookController>/5
-         [HttpPut("{id}")]
+        // PUT api/<BookController>/5
+        [HttpPut("{id}")]
         public async Task<IActionResult> UpdateBook(int id, [FromBody] Book updatedBook)
         {
             _logger.LogInformation("UpdateBook endpoint called for ID: {Id}", id);
 
+            // Kontrollera om modellen är giltig
+            if (!ModelState.IsValid)
+            {
+                _logger.LogWarning("UpdateBook validation failed for ID: {Id}. Errors: {Errors}",
+                    id,
+                    ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
+
+                // Returnera valideringsfel till klienten
+                return BadRequest(ModelState);
+            }
             try
             {
                 var result = await _mediator.Send(new UpdateBookByIdCommand(updatedBook, id));
@@ -129,8 +150,8 @@ namespace PresentationAPI.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An error occurred while updating the book with ID: {Id}", id);
-                return StatusCode(500, "An unexpected error occurred while updating the book.");
+               _logger.LogError(ex, "An error occurred while updating the book with ID: {Id}", id);
+               return StatusCode(500, "An unexpected error occurred while updating the book.");
             }
 
         }

@@ -4,6 +4,8 @@ using Applikation.Authors.Commands.DeleteAuthor;
 using Applikation.Authors.Commands.UpdateAuthor;
 using Applikation.Authors.Queries.GetAll;
 using Applikation.Authors.Queries.GetById;
+using Applikation.Interfaces.RepositoryInterfaces;
+using Infrastructure.Repositories;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -81,12 +83,15 @@ namespace PresentationAPI.Controllers
         {
             _logger.LogInformation("Start processing AddAuthor request.");
 
-            if (newAuthor == null || string.IsNullOrWhiteSpace(newAuthor.Name))
+            // Kontrollera om modellen är giltig
+            if (!ModelState.IsValid)
             {
-                _logger.LogWarning("Invalid Author data received.");
-                return BadRequest("Author data is invalid.");
-            }
+                _logger.LogWarning("AddAuthor validation failed. Errors: {Errors}",
+                    ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
 
+                // Returnera valideringsfel
+                return BadRequest(ModelState);
+            }
             try
             {
                 var command = new AddAuthorCommand(newAuthor);
@@ -109,31 +114,43 @@ namespace PresentationAPI.Controllers
                 return StatusCode(500, "An unexpected error occurred. Please try again later.");
             }
         }
-    
+
 
         // PUT api/<AuthorController>/5
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateAuthor(int id, [FromBody] Author updatedAuthor)
         {
-            _logger.LogInformation("Startar uppdatering av författare med ID: {AuthorId}", id);
+            _logger.LogInformation("Start processing UpdateAuthor request for ID: {AuthorId}", id);
 
-            if (updatedAuthor == null || string.IsNullOrWhiteSpace(updatedAuthor.Name))
+            // Kontrollera om modellen är giltig
+            if (!ModelState.IsValid)
             {
-                _logger.LogWarning("Uppdateringsdata för författare är ogiltig. AuthorId: {AuthorId}", id);
-                return BadRequest("Ogiltiga uppgifter för författare.");
+                _logger.LogWarning("UpdateAuthor validation failed for ID: {AuthorId}. Errors: {Errors}",
+                    id,
+                    ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
+
+                // Returnera valideringsfel
+                return BadRequest(ModelState);
             }
-
-            var command = new UpdateAuthorCommand(id, updatedAuthor);
-            var result = await _mediator.Send(command);
-
-            if (!result.IsSuccessful)
+            try
             {
-                _logger.LogWarning("Uppdateringen av författaren med ID: {AuthorId} misslyckades. Meddelande: {Message}", id, result.Message);
-                return NotFound(result.Message);
-            }
+                var command = new UpdateAuthorCommand(id, updatedAuthor);
+                var result = await _mediator.Send(command);
 
-            _logger.LogInformation("Författaren med ID: {AuthorId} har uppdaterats framgångsrikt.", id);
-            return Ok(result.Data); 
+                if (!result.IsSuccessful)
+                {
+                    _logger.LogWarning("Failed to update author with ID: {AuthorId}. Reason: {Reason}", id, result.Message);
+                    return NotFound(result.Message);
+                }
+
+                _logger.LogInformation("Author with ID: {AuthorId} updated successfully.", id);
+                return Ok(result.Data);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while updating author with ID: {AuthorId}.", id);
+                return StatusCode(500, "An unexpected error occurred. Please try again later.");
+            }
         }
 
 
@@ -151,12 +168,14 @@ namespace PresentationAPI.Controllers
             if (!result.IsSuccessful)
             {
                 _logger.LogWarning("Failed to delete AuthorId: {AuthorId}. Reason: {Reason}", id, result.Message);
-                return NotFound(result.Message);
+                return NotFound(new { Message = result.Message });
             }
 
             _logger.LogInformation("Successfully deleted AuthorId: {AuthorId}", id);
-            return NoContent(); 
+            return Ok(new { Message = $"Author with ID {id} has been successfully deleted." });
         }
+
+       
     }
 }
 

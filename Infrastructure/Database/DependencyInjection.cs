@@ -24,7 +24,7 @@ namespace Applikation.Interfaces.RepositoryInterfaces
             services.AddScoped<IAuthorRepository, AuthorRepository>();
 
 
-            //services.AddScoped<IUserRepository, UserRepository>();
+
 
             return services;
         }

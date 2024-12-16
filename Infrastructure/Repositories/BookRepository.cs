@@ -3,10 +3,11 @@ using Infrastructure.Database;
 using Models;
 using System;
 using System.Collections.Generic;
-using System.Data.Entity;
+
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories
 {
@@ -36,28 +37,33 @@ namespace Infrastructure.Repositories
         public async Task DeleteBook(int id)
         {
             var book = await _realdatabase.Books.FindAsync(id);
-            if (book != null)
+
+            if (book == null)
             {
-                _realdatabase.Books.Remove(book);
-                await _realdatabase.SaveChangesAsync();
+                throw new Exception($"Boken med ID {id} kunde inte hittas.");
             }
+
+            _realdatabase.Books.Remove(book);
+            await _realdatabase.SaveChangesAsync();
+
         }
 
         public async Task<List<Book>> GetAllBooks()
         {
-            return await _realdatabase.Books.ToListAsync();
-
+            return await _realdatabase.Books 
+                .Include(b => b.Author)
+                .ToListAsync();
         }
 
-        public async Task<Book> GetBookById(int id)
+        public async Task<Book?> GetBookById(int id)
         {
-            return await _realdatabase.Books
+                return await _realdatabase.Books
                 .Include(b => b.Author)
                 .FirstOrDefaultAsync(b => b.Id == id);
         }
 
     }
 
-    
+
 }
 
