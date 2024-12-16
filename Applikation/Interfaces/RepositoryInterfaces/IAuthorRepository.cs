@@ -14,5 +14,6 @@ namespace Applikation.Interfaces.RepositoryInterfaces
         Task DeleteAuthor(int id);
         Task<Author> GetAuthorById(int id);
         Task<List<Author>> GetAllAuthor();
+    
     }
 }

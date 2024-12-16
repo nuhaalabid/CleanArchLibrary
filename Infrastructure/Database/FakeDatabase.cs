@@ -22,14 +22,14 @@ namespace Infrastructure.Database
                 new Author(3, "Carl")
             };
 
-            Books = new List<Book>
-            {
-                new Book(1, "Sky", "Beskrivning1", Authors[0]),
-                new Book(2, "Fire", "Beskrivning2", Authors[1]),
-                new Book(3, "Ocean", "Beskrivning3", Authors[2]),
-                new Book(4, "Dream", "Beskrivning4", Authors[1]),
-                new Book(5, "Star", "Beskrivning5", Authors[0])
-            };
+            var Books = new List<Book>
+{
+             new Book { Id = 1, Title = "Sky", Description = "Beskrivning1", AuthorId = 1, Author = Authors[0] },
+             new Book { Id = 2, Title = "Fire", Description = "Beskrivning2", AuthorId = 2, Author = Authors[1] },
+             new Book { Id = 3, Title = "Ocean", Description = "Beskrivning3", AuthorId = 3, Author = Authors[2] },
+             new Book { Id = 4, Title = "Dream", Description = "Beskrivning4", AuthorId = 2, Author = Authors[1] },
+             new Book { Id = 5, Title = "Star", Description = "Beskrivning5", AuthorId = 1, Author = Authors[0] }
+};
 
             Users = new List<User>
             {
