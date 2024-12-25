@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Applikation.Users.Commands.AddUser
 {
-    public class AddUserCommand : IRequest<UserDto>
+    public class AddUserCommand : IRequest<OperationResult<User>>
     {
         public UserDto NewUser { get; set; }
 

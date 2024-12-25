@@ -31,7 +31,7 @@ namespace PresentationAPI.Controllers
 
 
         // GET: api/<AuthorController>
-        //[Authorize]
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> GetAllAuthor()
         {
